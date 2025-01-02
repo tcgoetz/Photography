@@ -14,6 +14,7 @@ from iptcinfo3 import IPTCInfo
 from fractions import Fraction
 import datetime
 
+
 #
 # Maps camera names in EXIF to more friendly names. If the camera name in EXIF is not found here, the value from EXIF will be used.
 #
@@ -76,7 +77,7 @@ lens_map = {
     # Sony
     'EF 50mm F1.8': 'Sony 50mm F1.8',
     'EF 70-200mm F4 G OSS': 'Sony 70-200mm F4',
-    'EF 90mm F2.8 Macro G OSS': 'Sony 90mm F2.8 Macro',
+    'FE 90mm F2.8 Macro G OSS': 'Sony 90mm F2.8 Macro',
     'E PZ 16-50mm F3.5-5.6 OSS': 'Sony 16-50mm F3.5-5.6',
     'E 10-18mm F4 OSS': 'Sony 10-18mm F4',
     'E 16-70mm F4 ZA OSS': 'Sony 16-70mm F4',
@@ -107,7 +108,7 @@ keywords_map = {
     "fall": "#fall",
     "fog": "#fog",
     "folliage": "#folliage",
-    "flower": "#flower",
+    "flower": "#flower #BloomScrolling",
     "garden": "#garden",
     "golden hour": "#GoldenHour",
     "hdr": "#hdr",
@@ -115,6 +116,7 @@ keywords_map = {
     "kayak": "#paddling",
     "lake": "#lake",
     "landscape": "#LandscapePhotography",
+    "lighthouse": "#lighthouse",
     "macro": "#MacroPhotography",
     "mountain": "#mountains",
     "mountains": "#mountains",
@@ -137,6 +139,17 @@ keywords_map = {
     "winter": "#winter",
     "wmnf": "#wmnf"
 }
+
+def IsDay(day_of_the_week):
+    return (datetime.datetime.today().weekday() == day_of_the_week)
+
+
+keyword_conditional_map = {
+    "waterfall": (IsDay(2), "#WaterfallWednesday"),
+    "cat": (IsDay(5), "#Caturday"),
+    "moody": (IsDay(6), "#SilentSunday")
+}
+
 
 #
 # Adds hashtags for popular locations.
@@ -284,10 +297,14 @@ def main(argv):
 
     hash_tags = '#photography'
     for keyword in iptc['keywords']:
-        hash_tag = keywords_map.get(keyword.decode("utf-8").lower())
+        keyword_decoded = keyword.decode("utf-8").lower()
+        hash_tag = keywords_map.get(keyword_decoded)
         if hash_tag:
             hash_tags += " " + hash_tag
-    
+        test, hash_tag = keyword_conditional_map.get(keyword_decoded, (None, None))
+        if test:
+            hash_tags += " " + hash_tag
+
     location_hash_tag = location_map.get(sublocation) or location_map.get(city)
     if location_hash_tag:
         hash_tags += " " + location_hash_tag
@@ -301,13 +318,13 @@ def main(argv):
     if args.gps:
         lat = gps_degrees_mins_secs_to_decimal(exif.gps_latitude, exif.gps_latitude_ref)
         long = gps_degrees_mins_secs_to_decimal(exif.gps_longitude, exif.gps_longitude_ref)
-        gps = f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n"
+        gps = f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n\n"
     else:
         gps = ""
 
     if args.critique:
         hash_tags += " #photocritique"
-        posting_notes = f'{title}\n{location}\n{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{hash_tags}'
+        posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{hash_tags}'
     else:
         posting_notes = f'{title}\n{location}\n\n{photo_data}\n\n{hash_tags}'
 

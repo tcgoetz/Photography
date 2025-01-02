@@ -17,3 +17,8 @@ Example output:
 > 
 > #photography #fog #LandscapePhotography #ocean #saltmarsh #weather #BuzzardsBay #photocritique #blackandwhitephotography
 
+Integrating the Script into Lightroom
+
+I have a export preset in Lightroom that uses Jeffrey Friedl's ["Run Any Command"](https://regex.info/blog/lightroom-goodies/run-any-command) plugin to run the script after the export. This is the template I use with "Run Any Command":
+
+> python3 /Users/tgoetz/Scripts/photo_post_data.py --critique --gps --file {NAME}.jpg --output {NAME}.txt
