@@ -9,10 +9,9 @@ __license__ = "GPL"
 
 import sys
 import argparse
-from exif import Image
-from iptcinfo3 import IPTCInfo
 from fractions import Fraction
 import datetime
+import exiftool
 
 
 #
@@ -36,6 +35,11 @@ camera_map = {
     'X-T4': 'Fuji X-T4',
     'X-T30': 'Fuji X-T30',
     'X-H2': 'Fuji X-H2'
+}
+
+camera_hash_map = {
+    "fujifilm": "#fujixseries",
+    "sony": "#sonyalpha"
 }
 
 
@@ -122,9 +126,10 @@ keywords_map = {
     "mountains": "#mountains",
     "nationalforest": "#NationalForest",
     "nationalpark": "#NationalPark",
+    "night": "#NightPhotography",
     "ocean": "#ocean",
     "panoramic": "#panoramic",
-    "relection": "#reflection",
+    "reflection": "#reflection",
     "saltmarsh": "#saltmarsh",
     "seascape": "#SeascapePhotography",
     "shorebird": "#ShoreBird",
@@ -135,7 +140,7 @@ keywords_map = {
     "sunset": "#sunset",
     "waterfall": "#waterfall",
     "weather": "#weather",
-    "wildlife": "#wildlife",
+    "wildlife": "#WildLifePhotography",
     "winter": "#winter",
     "wmnf": "#wmnf"
 }
@@ -145,7 +150,10 @@ def IsDay(day_of_the_week):
 
 
 keyword_conditional_map = {
+    "mountain": (IsDay(0), "#MountainMonday"),
+    "mountains": (IsDay(0), "#MountainMonday"),
     "waterfall": (IsDay(2), "#WaterfallWednesday"),
+    "flower": (IsDay(4), "#FlowerFriday"),
     "cat": (IsDay(5), "#Caturday"),
     "moody": (IsDay(6), "#SilentSunday")
 }
@@ -166,6 +174,7 @@ location_map = {
     "Yellowstone National Park": "#YellowstoneNationalPark",
     "Zion National Park": "#ZionNationalPark"
 }
+
 
 #
 # Adds hashtags for US states.
@@ -230,80 +239,96 @@ state_map = {
         'WY': '#wyoming'
 }
 
+
 country_code_map = {
     "AT": "#Austria"
 }
 
 
-def gps_degrees_mins_secs_to_decimal(gps_tuple, direction):
-    degrees, minutes, seconds = gps_tuple
-    decimal = float(degrees) + float(minutes) / 60 + float(seconds) / (60 * 60)
+base_hash_tags = '#photography #AmateurPhotography'
+
+
+def gps_degrees_mins_secs_to_decimal(decimal, direction):
     if direction == 'W' or direction == 'S':
         decimal *= -1
     return decimal
 
 
-def iptc_get(iptc, field_name):
-    field = iptc[field_name]
-    if field:
-        return field.decode("utf-8")
+class MetaData:
+    def __init__(self, file, **kwargs):
+        with exiftool.ExifToolHelper(**kwargs) as et_helper:
+            self.metadata = et_helper.get_metadata(file)[0]
+
+    def get_all(self, type):
+        return {k: v for k, v in self.metadata.items() if k.startswith(type + ":")}
+
+    def get_exif(self, property_name):
+        return self.metadata.get("EXIF:" + property_name)
+
+    def get_iptc(self, property_name):
+        return self.metadata.get("IPTC:" + property_name)
+
+    def get_xmp(self, property_name):
+        return self.metadata.get("XMP:" + property_name)
 
 
 def main(argv):
     """Copy metadata."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", help="Path and name of the image file.", type=str)
+    parser.add_argument("-f", "--file", help="Path and name of the image file.", type=str, required=True)
     parser.add_argument("-o", "--output", help="Path and name of the output file.", type=str)
+    parser.add_argument("-e", "--exiftool", help="Full path to exiftool.", type=str)
     parser.add_argument("-z", "--mapzoom", help="Zoom level for OSM map link.", type=int, default=17)
     parser.add_argument("-d", "--dump", help="Dumpp image EXIF and IPTC data.", action="store_true", default=False)
     parser.add_argument("-g", "--gps", help="Add OSM link with gps.", action="store_true", default=False)
     parser.add_argument("-c", "--critique", help="Request critiques.", action="store_true", default=False)
+    parser.add_argument("-a", "--alttxt", help="Output ALT text.", action="store_true", default=False)
+    parser.add_argument("-r", "--copyright", help="Output copyright notice.", action="store_true", default=False)
     parser.add_argument("-v", "--verbose", help="Echo output to the screen.", action="store_true", default=False)
     args = parser.parse_args()
-
-    if not args.file:
-        print("--file required")
-        sys.exit()
-
-    with open(args.file, 'rb') as image_file:
-        exif = Image(image_file)
-        iptc = IPTCInfo(args.file)
-
-        if not exif.has_exif:
-            print(f"{args.file} has no exif data!")
-            sys.exit()
+    
+    if args.exiftool:
+        print(f"Using exiftool from {args.exiftool}")
+        metadata = MetaData(args.file, executable=args.exiftool)
+    else:
+        metadata = MetaData(args.file)
 
     if args.dump:
-        print(f"exif:\n{exif.get_all()}")
-        print(f"iptc:\n{str(iptc)}")
+        print(f"exif:\n{metadata.get_all('EXIF')}")
+        print(f"iptc:\n{metadata.get_all('IPTC')}")
+        print(f"iptc:\n{metadata.get_all('XMP')}\n")
 
-    title = iptc['object name'].decode("utf-8")
-    caption = iptc_get(iptc, 'caption/abstract')
+    title = metadata.get_iptc('ObjectName')
+    caption = metadata.get_iptc('Caption-Abstract')
     if caption:
         title = f"{title} - {caption}"
 
-    sublocation = iptc_get(iptc, 'sub-location')
-    city = iptc_get(iptc, 'city')
-    state = iptc_get(iptc, 'province/state')
-    country = iptc_get(iptc, 'country/primary location name')
-    country_code = iptc_get(iptc, 'country/primary location code')
+    sublocation = metadata.get_iptc('Sub-location')
+    city = metadata.get_iptc('City')
+    state = metadata.get_iptc('Province-State')
+    country = metadata.get_iptc('Country-PrimaryLocationName')
+    country_code = metadata.get_iptc('Country-PrimaryLocationCode')
     location = f"{sublocation}, {city}, {state}, {country}"
 
-    when_taken = datetime.datetime.strptime(exif.datetime_original, "%Y:%m:%d %H:%M:%S")
-    shutter_speed = Fraction(float(exif.exposure_time)).limit_denominator()
-    lens = lens_map.get(exif.lens_model, exif.lens_model)
-    camera = camera_map.get(exif.model, exif.model)
-    photo_data = f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{exif.f_number} @ {exif.focal_length}mm @ {exif.photographic_sensitivity} ISO"
+    when_taken = datetime.datetime.strptime(metadata.get_exif('DateTimeOriginal'), "%Y:%m:%d %H:%M:%S")
+    shutter_speed = Fraction(float(metadata.get_exif('ExposureTime'))).limit_denominator()
+    lens = lens_map.get(metadata.get_exif('LensModel'), metadata.get_exif('LensModel'))
+    camera = camera_map.get(metadata.get_exif('Model'), metadata.get_exif('Model'))
+    photo_data = f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO"
 
-    hash_tags = '#photography'
-    for keyword in iptc['keywords']:
-        keyword_decoded = keyword.decode("utf-8").lower()
+    hash_tags = base_hash_tags
+    for keyword in metadata.get_iptc('Keywords'):
+        keyword_decoded = keyword.lower()
         hash_tag = keywords_map.get(keyword_decoded)
         if hash_tag:
             hash_tags += " " + hash_tag
         test, hash_tag = keyword_conditional_map.get(keyword_decoded, (None, None))
         if test:
             hash_tags += " " + hash_tag
+
+    camera_hash_tag = camera_hash_map.get(metadata.get_exif('Make').lower())
+    if camera_hash_tag:
+        hash_tags += " " + camera_hash_tag
 
     location_hash_tag = location_map.get(sublocation) or location_map.get(city)
     if location_hash_tag:
@@ -316,17 +341,27 @@ def main(argv):
         hash_tags += " " + country_hash_tag
 
     if args.gps:
-        lat = gps_degrees_mins_secs_to_decimal(exif.gps_latitude, exif.gps_latitude_ref)
-        long = gps_degrees_mins_secs_to_decimal(exif.gps_longitude, exif.gps_longitude_ref)
+        lat = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLatitude'), metadata.get_exif('GPSLatitudeRef'))
+        long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
         gps = f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n\n"
     else:
         gps = ""
 
+    copyright = metadata.get_iptc("CopyrightNotice")
+    if args.copyright and copyright:
+        copyright = f"\n{copyright}. All rights reserved. This image may not be used to train an AI."
+    else:
+        copyright= ""
+
     if args.critique:
         hash_tags += " #photocritique"
-        posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{hash_tags}'
+        posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{hash_tags}\n{copyright}'
     else:
-        posting_notes = f'{title}\n{location}\n\n{photo_data}\n\n{hash_tags}'
+        posting_notes = f'{title}\n{location}\n\n{photo_data}\n\n{hash_tags}{copyright}'
+
+    alt_txt = metadata.get_xmp("AltTextAccessibility")
+    if args.alttxt and alt_txt:
+        posting_notes += f"\n\n-- ALT TXT\n\n{alt_txt}{copyright}"
 
     if args.output:
         with open(args.output, "w") as text_file:
