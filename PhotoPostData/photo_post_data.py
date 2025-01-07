@@ -101,7 +101,7 @@ lens_map = {
 #
 keywords_map = {
     "adapted lens": "#AdaptedLens",
-    "beach": "#beach",
+    "beach": "#BeachPhotography",
     "bird": "#bird",
     "blackandwhite": "#BlackAndWhitePhotography",
     "canoe": "#paddling",
@@ -115,6 +115,7 @@ keywords_map = {
     "flower": "#flower #BloomScrolling",
     "garden": "#garden",
     "golden hour": "#GoldenHour",
+    "hand held": "#HandHeld",
     "hdr": "#hdr",
     "hiking": "#hiking",
     "kayak": "#paddling",
@@ -144,6 +145,7 @@ keywords_map = {
     "winter": "#winter",
     "wmnf": "#wmnf"
 }
+
 
 def IsDay(day_of_the_week):
     return (datetime.datetime.today().weekday() == day_of_the_week)
@@ -244,6 +246,10 @@ country_code_map = {
     "AT": "#Austria"
 }
 
+day_of_the_week = {
+    0: "#PhotoMonday"
+}
+
 
 base_hash_tags = '#photography #AmateurPhotography'
 
@@ -279,11 +285,12 @@ def main(argv):
     parser.add_argument("-o", "--output", help="Path and name of the output file.", type=str)
     parser.add_argument("-e", "--exiftool", help="Full path to exiftool.", type=str)
     parser.add_argument("-z", "--mapzoom", help="Zoom level for OSM map link.", type=int, default=17)
-    parser.add_argument("-d", "--dump", help="Dumpp image EXIF and IPTC data.", action="store_true", default=False)
-    parser.add_argument("-g", "--gps", help="Add OSM link with gps.", action="store_true", default=False)
+    parser.add_argument("-d", "--dump", help="Dumpp image EXIF, IPTC, and XMP data.", action="store_true", default=False)
+    parser.add_argument("-g", "--gps", help="Add OSM link using gps coordinates from EXIF.", action="store_true", default=False)
     parser.add_argument("-c", "--critique", help="Request critiques.", action="store_true", default=False)
-    parser.add_argument("-a", "--alttxt", help="Output ALT text.", action="store_true", default=False)
-    parser.add_argument("-r", "--copyright", help="Output copyright notice.", action="store_true", default=False)
+    parser.add_argument("-a", "--alttxt", help="Output ALT text from XMP.", action="store_true", default=False)
+    parser.add_argument("-r", "--copyright", help="Output copyright notice based on IPTC copyright data.", action="store_true", default=False)
+    parser.add_argument("-n", "--noai", help="Add text to the copyright notice to forbid use in training AIs.", action="store_true", default=False)
     parser.add_argument("-v", "--verbose", help="Echo output to the screen.", action="store_true", default=False)
     args = parser.parse_args()
     
@@ -349,9 +356,15 @@ def main(argv):
 
     copyright = metadata.get_iptc("CopyrightNotice")
     if args.copyright and copyright:
-        copyright = f"\n{copyright}. All rights reserved. This image may not be used to train an AI."
+        copyright = f"\n{copyright}. All rights reserved."
     else:
         copyright= ""
+    if args.noai:
+        copyright += "Training an AI on this image is expressly forbidden."
+
+    day_hash = day_of_the_week.get(datetime.datetime.today().weekday())
+    if day_hash:
+        hash_tags += " " + day_hash
 
     if args.critique:
         hash_tags += " #photocritique"
