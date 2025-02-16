@@ -38,8 +38,8 @@ camera_map = {
 }
 
 camera_hash_map = {
-    "fujifilm": "#fujixseries",
-    "sony": "#sonyalpha"
+    "fujifilm": "#FujiFilm #FujiXSeries #FujiPhotography",
+    "sony": "#SonyAlpha"
 }
 
 
@@ -73,7 +73,7 @@ lens_map = {
     'EF300mm f/4L USM': 'Canon 300mm F4',
     'EF300mm f/4L USM +1.4x': 'Canon 300mm F4 with 1.4x TC',
     '17.0-40.0mm': 'Canon 17-40mm F4',
-    'EF17-40mm F/4L USM': 'Canon 17-40mm F4',
+    'EF17-40mm f/4L USM': 'Canon 17-40mm F4',
     'EF24-105mm f/4L IS USM': 'Canon 24-105mm F4',
     '20.0-35.0mm': 'Canon 20-35mm F3.5-4.5',
     '70.0-200.0mm': 'Canon 70-200mm F4',
@@ -111,7 +111,7 @@ keywords_map = {
     "clouds": "#clouds",
     "fall": "#fall",
     "fog": "#fog",
-    "folliage": "#folliage",
+    "foliage": "#foliage",
     "flower": "#flower #BloomScrolling",
     "garden": "#garden",
     "golden hour": "#GoldenHour",
@@ -130,11 +130,13 @@ keywords_map = {
     "night": "#NightPhotography",
     "ocean": "#ocean",
     "panoramic": "#panoramic",
+    "portrait": "#portrait",
     "reflection": "#reflection",
     "saltmarsh": "#saltmarsh",
     "seascape": "#SeascapePhotography",
     "shorebird": "#ShoreBird",
     "sky": "#sky",
+    "spring": "#spring",
     "statepark": "#StatePark",
     "summer": "#summer",
     "sunrise": "#sunrise",
@@ -143,7 +145,7 @@ keywords_map = {
     "weather": "#weather",
     "wildlife": "#WildLifePhotography",
     "winter": "#winter",
-    "wmnf": "#wmnf"
+    "wmnf": "#WhiteMountainNationalForest"
 }
 
 
@@ -152,11 +154,17 @@ def IsDay(day_of_the_week):
 
 
 keyword_conditional_map = {
+    "dog": (IsDay(0), "#MonDog"),
     "mountain": (IsDay(0), "#MountainMonday"),
     "mountains": (IsDay(0), "#MountainMonday"),
+    "ocean": (IsDay(2), "#OceanWednesday"),
     "waterfall": (IsDay(2), "#WaterfallWednesday"),
+    "waves": (IsDay(2), "#WavyWednesday"),
     "flower": (IsDay(4), "#FlowerFriday"),
+    "trail": (IsDay(4), "#FootPathFriday"),
+    "window": (IsDay(4), "#FensterFreitag #WindowFriday"),
     "cat": (IsDay(5), "#Caturday"),
+    "fog": (IsDay(6), "#SilentSunday"),
     "moody": (IsDay(6), "#SilentSunday")
 }
 
@@ -291,6 +299,7 @@ def main(argv):
     parser.add_argument("-a", "--alttxt", help="Output ALT text from XMP.", action="store_true", default=False)
     parser.add_argument("-r", "--copyright", help="Output copyright notice based on IPTC copyright data.", action="store_true", default=False)
     parser.add_argument("-n", "--noai", help="Add text to the copyright notice to forbid use in training AIs.", action="store_true", default=False)
+    parser.add_argument("-s", "--short", help="Short form.", action="store_true", default=False)
     parser.add_argument("-v", "--verbose", help="Echo output to the screen.", action="store_true", default=False)
     args = parser.parse_args()
     
@@ -360,17 +369,22 @@ def main(argv):
     else:
         copyright= ""
     if args.noai:
-        copyright += "Training an AI on this image is expressly forbidden."
+        copyright += " Training an AI on this image is expressly forbidden."
 
     day_hash = day_of_the_week.get(datetime.datetime.today().weekday())
     if day_hash:
         hash_tags += " " + day_hash
 
+    if args.short:
+        end_text = f"{hash_tags}\n{copyright}"
+    else:
+        end_text = hash_tags
+
     if args.critique:
         hash_tags += " #photocritique"
-        posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{hash_tags}\n{copyright}'
+        posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{end_text}'
     else:
-        posting_notes = f'{title}\n{location}\n\n{photo_data}\n\n{hash_tags}{copyright}'
+        posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\n{end_text}'
 
     alt_txt = metadata.get_xmp("AltTextAccessibility")
     if args.alttxt and alt_txt:
