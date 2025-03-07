@@ -8,95 +8,20 @@ __license__ = "GPL"
 
 
 import sys
+import os
 import argparse
 from fractions import Fraction
 import datetime
 import exiftool
+import json
 
-
-#
-# Maps camera names in EXIF to more friendly names. If the camera name in EXIF is not found here, the value from EXIF will be used.
-#
-camera_map = {
-    "Canon EOS 5D": "Canon 5D",
-    "Canon EOS 5D Mark II": "Canon 5Dm2",
-    "Canon EOS 7D": "Canon 7D",
-    "Canon EOS 10D": "Canon 10D",
-    "Canon EOS 30D": "Canon 30D",
-    "Canon PowerShot G7 X": "Canon G7X",
-    "Canon PowerShot G9": "Canon G9",
-    "Canon PowerShot G12": "Canon G12",
-    "Canon PowerShot G15": "Canon G15",
-    "DC-LX100M2": "Panosonic LX100M2",
-    'ILCE-6000': 'Sony a6000',
-    'ILCE-6500': 'Sony a6500',
-    'X-E3': 'Fuji X-E3',
-    'X-T3': 'Fuji X-T3',
-    'X-T4': 'Fuji X-T4',
-    'X-T30': 'Fuji X-T30',
-    'X-H2': 'Fuji X-H2'
-}
 
 camera_hash_map = {
+    "canon": "#CanonPhotography",
     "fujifilm": "#FujiFilm #FujiXSeries #FujiPhotography",
     "sony": "#SonyAlpha"
 }
 
-
-#
-# Maps lens names in EXIF to more friendly names. If the lens name in EXIF is not found here, the value from EXIF will be used.
-#
-lens_map = {
-    # Canon 50 1.4
-    '50.0mm': 'Canon 50mm F1.4',
-    'EF50mm/1.4 USM': 'Canon 50mm F1.4',
-    'EF50mm f/1.4 USM': 'Canon 50mm F1.4',
-    'Canon EF 50mm f/1.4 USM': 'Canon 50mm F1.4',
-    # Canon 85 1.8
-    '85.0mm': 'Canon 85mm F1.8',
-    'EF85/1.8 USM': 'Canon 85mm F1.8',
-    'EF85 f/1.8 USM': 'Canon 85mm F1.8',
-    'Canon EF 85mm f/1.8 USM': 'Canon 85mm F1.8',
-    'Canon EF 100mm f/2.8 L Macro IS USM': 'Canon 100mm F2.8 Macro',
-    # Canon 180 macro
-    '180.0mm': 'Canon 180mm F3.5 Macro',
-    'EF180mm f/3.5 L Macro USM': 'Canon 180mm F3.5 Macro',
-    'Canon EF 180mm f/3.5 L USM': 'Canon 180mm F3.5 Macro',
-    'EF180mm f/3.5 L Macro USM +1.4x': 'Canon 180mm F3.5 Macro with 1.4x TC',
-    'EF180mm f/3.5 L Macro USM +2.0x': 'Canon 180mm F3.5 Macro with 2.0x TC',
-    # Canon 300 2.8
-    '300.0mm': 'Canon 300mm F2.8',
-    'EF300mm f/2.8L IS USM': 'Canon 300mm F2.8',
-    'EF300mm f/2.8L IS USM +1.4x': 'Canon 300mm F2.8 with 1.4x TC',
-    'EF300mm f/2.8L IS USM +2.0x': 'Canon 300mm F2.8 with 2.0x TC',
-    # Canon 300 f4
-    'EF300mm f/4L USM': 'Canon 300mm F4',
-    'EF300mm f/4L USM +1.4x': 'Canon 300mm F4 with 1.4x TC',
-    '17.0-40.0mm': 'Canon 17-40mm F4',
-    'EF17-40mm f/4L USM': 'Canon 17-40mm F4',
-    'EF24-105mm f/4L IS USM': 'Canon 24-105mm F4',
-    '20.0-35.0mm': 'Canon 20-35mm F3.5-4.5',
-    '70.0-200.0mm': 'Canon 70-200mm F4',
-    'EF70.0-200.0mm f/4L USM': 'Canon 70-200mm F4',
-    # Sony
-    'EF 50mm F1.8': 'Sony 50mm F1.8',
-    'EF 70-200mm F4 G OSS': 'Sony 70-200mm F4',
-    'FE 90mm F2.8 Macro G OSS': 'Sony 90mm F2.8 Macro',
-    'E PZ 16-50mm F3.5-5.6 OSS': 'Sony 16-50mm F3.5-5.6',
-    'E 10-18mm F4 OSS': 'Sony 10-18mm F4',
-    'E 16-70mm F4 ZA OSS': 'Sony 16-70mm F4',
-    '16mm F1.4 DC DN | Contemporary 016': 'Sigma 16mm F1.4',
-    '16mm F1.4 DC DN | Contemporary 017': 'Sigma 16mm F1.4',
-    # Fuji
-    "XF16mmF1.4 R WR": "Fuji 16mm F1.4",
-    "XF35mmF1.4 R": "Fuji 35mm F1.4",
-    "XF10-24mmF4 R OIS": "Fuji 10-24mm F4",
-    "XF16-55mmF2.8 R LM WR": "Fuji 16-55mm F2.8",
-    "XF18-55mmF2.8-4 R LM OIS": "Fuji 18-55mm F2.8-4",
-    "XF55-200mmF3.5-4.8 R LM OIS": "Fuji 55-200mm F3.5-4.8",
-    # Adapted Lenses
-    "Metabones 180/3.5": "Canon 180mm F3.5 Macro on a Metabones adapter"
-}
 
 #
 # Reformats and filters out keywords we don't want to publish. Keyword in IPTC that are not present here, will be ignored.
@@ -177,24 +102,6 @@ keyword_conditional_map = {
 
 
 #
-# Adds hashtags for popular locations.
-#
-location_map = {
-    "Acadia National Park": "#AcadiaNationalPark",
-    "Ashland State Park": "#AshlandStatePark",
-    "Beaufort": "#OBX #OuterBanks",
-    "Crawford Notch State Park": "#CrawfordNotchStatePark",
-    "Franconia Notch State Park": "#FranconiaNotchStatePark",
-    "Wareham": "#BuzzardsBay",
-    "Westport": "#BuzzardsBay",
-    "White Mountain National Forest": "#WhiteMountainNationalForest",
-    "Whitehall State Park": "#WhitehallStatePark",
-    "Yellowstone National Park": "#YellowstoneNationalPark",
-    "Zion National Park": "#ZionNationalPark"
-}
-
-
-#
 # Adds hashtags for US states.
 #
 state_map = {
@@ -237,6 +144,7 @@ state_map = {
         'ND': '#NorthDakota',
         'NE': '#Nebraska',
         'NH': '#NewHampshire',
+        'New Hampshire': '#NewHampshire',
         'NJ': '#NewJersey',
         'NM': '#NewMexico',
         'NV': '#nevada',
@@ -270,9 +178,6 @@ country_code_map = {
 day_of_the_week = {
     0: "#PhotoMonday"
 }
-
-
-base_hash_tags = '#Photography #AmateurPhotography #MyPhoto'
 
 
 def gps_degrees_mins_secs_to_decimal(decimal, direction):
@@ -327,6 +232,19 @@ def main(argv):
         print(f"iptc:\n{metadata.get_all('IPTC')}")
         print(f"iptc:\n{metadata.get_all('XMP')}\n")
 
+    with open(os.path.dirname(__file__) + os.sep + 'photo_post_data.json') as json_file:
+        config = json.load(json_file)
+
+    base_hash_tags = config.get('base_hash_tags', "")
+    # Maps camera names in EXIF to more friendly names. If the camera name in EXIF is not found here, the value from EXIF will be used.
+    camera_map = config.get('camera_map', {})
+    # Maps lens names in EXIF to more friendly names. If the lens name in EXIF is not found here, the value from EXIF will be used.
+    lens_map = config.get('lens_map', {})
+    # Adds hashtags for popular locations.
+    location_map = config.get('location_map', {})
+    # don't display location or map link for these
+    private_places = config.get('private_places', {})
+
     title = metadata.get_iptc('ObjectName')
     caption = metadata.get_iptc('Caption-Abstract')
     if caption:
@@ -337,7 +255,11 @@ def main(argv):
     state = metadata.get_iptc('Province-State')
     country = metadata.get_iptc('Country-PrimaryLocationName')
     country_code = metadata.get_iptc('Country-PrimaryLocationCode')
-    location = f"{sublocation}, {city}, {state}, {country}"
+    private_place = sublocation in private_places
+    if private_place:
+        location = f"{city}, {state}, {country}"
+    else:
+        location = f"{sublocation}, {city}, {state}, {country}"
 
     when_taken = datetime.datetime.strptime(metadata.get_exif('DateTimeOriginal'), "%Y:%m:%d %H:%M:%S")
     shutter_speed = Fraction(float(metadata.get_exif('ExposureTime'))).limit_denominator()
@@ -369,7 +291,7 @@ def main(argv):
     if country_hash_tag:
         hash_tags += " " + country_hash_tag
 
-    if args.gps:
+    if args.gps and not private_place:
         lat = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLatitude'), metadata.get_exif('GPSLatitudeRef'))
         long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
         gps = f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n\n"
@@ -393,9 +315,15 @@ def main(argv):
     else:
         end_text = hash_tags
 
+    description_txt = metadata.get_xmp("ExtDescrAccessibility")
+    if description_txt:
+        description = description_txt + "\n\n"
+    else:
+        description = ""
+
     if args.critique:
-        hash_tags += " #photocritique"
-        posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{end_text}'
+        hash_tags += " #PhotoCritique"
+        posting_notes = f'{title}\n{location}\n\n{description}{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{end_text}'
     else:
         posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\n{end_text}'
 

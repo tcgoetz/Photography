@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+#
+#
+#
+
+PhotoPostData/photo_post_data.json
