@@ -40,7 +40,8 @@ keywords_map = {
     "fog": "#Fog",
     "foliage": "#Foliage",
     "flower": "#Flower #BloomScrolling",
-    "garden": "#Garden",
+    "flowers": "#Flowers #BloomScrolling",
+    "garden": "#Garden #GardenPhotography",
     "golden hour": "#GoldenHour",
     "hand held": "#HandHeld",
     "hdr": "#hdr",
@@ -50,6 +51,7 @@ keywords_map = {
     "lake": "#Lake",
     "landscape": "#LandscapePhotography",
     "lighthouse": "#Lighthouse",
+    "nature": "#NatuePhotography",
     "macro": "#MacroPhotography",
     "mountain": "#Mountains",
     "mountains": "#Mountains",
@@ -89,10 +91,14 @@ keyword_conditional_map = {
     "blackandwhite": (IsDay(0), "#MonochromeMonday"),
     "mountain": (IsDay(0), "#MountainMonday"),
     "mountains": (IsDay(0), "#MountainMonday"),
-    "tree": (IsDay(1), "#ThickTrunkThursday"),
+    "pattern": (IsDay(1), "#TextureTuesday"),
+    "patterns": (IsDay(1), "#TextureTuesday"),
+    "texture": (IsDay(1), "#TextureTuesday"),
+    "turtle": (IsDay(1), "#TurtleTuesday"),
     "ocean": (IsDay(2), "#OceanWednesday"),
     "waterfall": (IsDay(2), "#WaterfallWednesday"),
     "waves": (IsDay(2), "#WavyWednesday"),
+    "tree": (IsDay(3), "#ThickTrunkThursday"),
     "flower": (IsDay(4), "#FlowerFriday"),
     "fungus": (IsDay(4), "#FungiFriday"),
     "mushroom": (IsDay(4), "#FungiFriday"),
@@ -215,14 +221,15 @@ def main(argv):
     parser.add_argument("-f", "--file", help="Path and name of the image file.", type=str, required=True)
     parser.add_argument("-o", "--output", help="Path and name of the output file.", type=str)
     parser.add_argument("-e", "--exiftool", help="Full path to exiftool.", type=str)
+    parser.add_argument("-d", "--data", help="Include photo data", action="store_true", default=False)
+    parser.add_argument("-t", "--tags", help="Include photo tags", action="store_true", default=False)
     parser.add_argument("-z", "--mapzoom", help="Zoom level for OSM map link.", type=int, default=17)
-    parser.add_argument("-d", "--dump", help="Dumpp image EXIF, IPTC, and XMP data.", action="store_true", default=False)
+    parser.add_argument("-p", "--dump", help="Dumpp image EXIF, IPTC, and XMP data.", action="store_true", default=False)
     parser.add_argument("-g", "--gps", help="Add OSM link using gps coordinates from EXIF.", action="store_true", default=False)
     parser.add_argument("-c", "--critique", help="Request critiques.", action="store_true", default=False)
     parser.add_argument("-a", "--alttxt", help="Output ALT text from XMP.", action="store_true", default=False)
     parser.add_argument("-r", "--copyright", help="Output copyright notice based on IPTC copyright data.", action="store_true", default=False)
     parser.add_argument("-n", "--noai", help="Add text to the copyright notice to forbid use in training AIs.", action="store_true", default=False)
-    parser.add_argument("-s", "--short", help="Short form.", action="store_true", default=False)
     parser.add_argument("-v", "--verbose", help="Echo output to the screen.", action="store_true", default=False)
     args = parser.parse_args()
     
@@ -255,6 +262,8 @@ def main(argv):
     if caption:
         title = f"{title} - {caption}"
 
+    posting_notes = title
+
     sublocation = metadata.get_iptc('Sub-location')
     city = metadata.get_iptc('City')
     state = metadata.get_iptc('Province-State')
@@ -262,18 +271,19 @@ def main(argv):
     country_code = metadata.get_iptc('Country-PrimaryLocationCode')
     private_place = sublocation in private_places
     if private_place:
-        location = f"{city}, {state}, {country}"
+        posting_notes += '\n' + f"{city}, {state}, {country}\n\n"
     else:
-        location = f"{sublocation}, {city}, {state}, {country}"
+        posting_notes += '\n' + f"{sublocation}, {city}, {state}, {country}\n\n"
 
     when_taken = datetime.datetime.strptime(metadata.get_exif('DateTimeOriginal'), "%Y:%m:%d %H:%M:%S")
     shutter_speed = Fraction(float(metadata.get_exif('ExposureTime'))).limit_denominator()
     lens = lens_map.get(metadata.get_exif('LensModel'), metadata.get_exif('LensModel'))
     camera = camera_map.get(metadata.get_exif('Model'), metadata.get_exif('Model'))
-    photo_data = f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO"
+    if args.data:
+        posting_notes +=  f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO\n\n"
 
     hash_tags = base_hash_tags
-    for keyword in metadata.get_iptc('Keywords'):
+    for keyword in metadata.get_iptc('Keywords') or []:
         keyword_decoded = keyword.lower()
         hash_tag = keywords_map.get(keyword_decoded)
         if hash_tag:
@@ -299,9 +309,7 @@ def main(argv):
     if args.gps and not private_place:
         lat = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLatitude'), metadata.get_exif('GPSLatitudeRef'))
         long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
-        gps = f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n\n"
-    else:
-        gps = ""
+        posting_notes += f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n\n"
 
     copyright = metadata.get_iptc("CopyrightNotice")
     if args.copyright and copyright:
@@ -315,22 +323,16 @@ def main(argv):
     if day_hash:
         hash_tags += " " + day_hash
 
-    if args.short:
-        end_text = f"{hash_tags}\n{copyright}"
-    else:
-        end_text = hash_tags
-
     description_txt = metadata.get_xmp("ExtDescrAccessibility")
     if description_txt:
-        description = description_txt + "\n\n"
-    else:
-        description = ""
+        posting_notes += "\n\n" + description_txt + "\n\n"
 
     if args.critique:
         hash_tags += " #PhotoCritique"
-        posting_notes = f'{title}\n{location}\n\n{description}{gps}{photo_data}\n\nCritiques welcome. Thanks for taking the time to look at my photo.\n\n{end_text}'
-    else:
-        posting_notes = f'{title}\n{location}\n\n{gps}{photo_data}\n\n{end_text}'
+        posting_notes += 'Critiques welcome. Thanks for taking the time to look at my photo.\n\n'
+
+    if args.tags:
+        posting_notes += hash_tags
 
     alt_txt = metadata.get_xmp("AltTextAccessibility")
     if args.alttxt and alt_txt:
