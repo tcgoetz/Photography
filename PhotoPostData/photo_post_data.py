@@ -27,7 +27,7 @@ camera_hash_map = {
 # Reformats and filters out keywords we don't want to publish. Keyword in IPTC that are not present here, will be ignored.
 #
 keywords_map = {
-    "adapted lens": "#AdaptedLens",
+    "adaptedlens": "#AdaptedLens",
     "beach": "#BeachPhotography",
     "bird": "#bird #BirdPhotography",
     "blackandwhite": "#BlackAndWhitePhotography",
@@ -42,8 +42,8 @@ keywords_map = {
     "flower": "#Flower #BloomScrolling",
     "flowers": "#Flowers #BloomScrolling",
     "garden": "#Garden #GardenPhotography",
-    "golden hour": "#GoldenHour",
-    "hand held": "#HandHeld",
+    "goldenhour": "#GoldenHour",
+    "handheld": "#HandHeld",
     "hdr": "#hdr",
     "hiking": "#Hiking",
     "historic": "#Historic",
@@ -51,12 +51,13 @@ keywords_map = {
     "lake": "#Lake",
     "landscape": "#LandscapePhotography",
     "lighthouse": "#Lighthouse",
-    "nature": "#NatuePhotography",
+    "nature": "#NaturePhotography",
     "macro": "#MacroPhotography",
     "mountain": "#Mountains",
     "mountains": "#Mountains",
     "nationalforest": "#NationalForest",
     "nationalpark": "#NationalPark",
+    "nationalwildliferefuge": "#NationalWildlifeRefuge",
     "night": "#NightPhotography",
     "ocean": "#Ocean",
     "panoramic": "#Panorama",
@@ -95,16 +96,22 @@ keyword_conditional_map = {
     "patterns": (IsDay(1), "#TextureTuesday"),
     "texture": (IsDay(1), "#TextureTuesday"),
     "turtle": (IsDay(1), "#TurtleTuesday"),
-    "ocean": (IsDay(2), "#OceanWednesday"),
+    "ocean": (IsDay(2), "#OceanWednesday #MeerMittwoch"),
+    "water": (IsDay(2), "#WaterOnWednesday"),
     "waterfall": (IsDay(2), "#WaterfallWednesday"),
+    "wildlife": (IsDay(2), "#WildlifeWednesday"),
     "waves": (IsDay(2), "#WavyWednesday"),
+    "door": (IsDay(3), "#DoorsDay"),
     "tree": (IsDay(3), "#ThickTrunkThursday"),
+    "fern": (IsDay(4), "#FernsOnFriday"),
     "flower": (IsDay(4), "#FlowerFriday"),
     "fungus": (IsDay(4), "#FungiFriday"),
     "mushroom": (IsDay(4), "#FungiFriday"),
+    "path": (IsDay(4), "#FootPathFriday"),
     "trail": (IsDay(4), "#FootPathFriday"),
     "window": (IsDay(4), "#FensterFreitag #WindowFriday"),
     "cat": (IsDay(5), "#Caturday"),
+    "landscape": (IsDay(5), "#SaturdayScenery"),
     "fog": (IsDay(6), "#SilentSunday"),
     "moody": (IsDay(6), "#SilentSunday")
 }
@@ -262,7 +269,7 @@ def main(argv):
     if caption:
         title = f"{title} - {caption}"
 
-    posting_notes = title
+    posting_notes = title or ""
 
     sublocation = metadata.get_iptc('Sub-location')
     city = metadata.get_iptc('City')
