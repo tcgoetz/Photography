@@ -1,3 +1,3 @@
 # Photography
 
-Scripts and utilities to make some photography taks easier.
+Scripts and utilities to make some photography tasks easier.
