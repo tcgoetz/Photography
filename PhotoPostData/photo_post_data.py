@@ -28,6 +28,7 @@ camera_hash_map = {
 #
 keywords_map = {
     "adaptedlens": "#AdaptedLens",
+    "astronomy": "#astronomy #AstroPhotography",
     "beach": "#BeachPhotography",
     "bird": "#bird #BirdPhotography",
     "blackandwhite": "#BlackAndWhitePhotography",
@@ -36,6 +37,8 @@ keywords_map = {
     "cat": "#cat #CatsOfPixelfed",
     "closeup": "#CloseupPhotography",
     "clouds": "#Clouds",
+    "dog": "#dog #DogsOfPixelfed",
+    "door": "#Door #DailyDoor",
     "fall": "#Fall",
     "fog": "#Fog",
     "foliage": "#Foliage",
@@ -51,13 +54,13 @@ keywords_map = {
     "lake": "#Lake",
     "landscape": "#LandscapePhotography",
     "lighthouse": "#Lighthouse",
-    "nature": "#NaturePhotography",
     "macro": "#MacroPhotography",
     "mountain": "#Mountains",
     "mountains": "#Mountains",
     "nationalforest": "#NationalForest",
     "nationalpark": "#NationalPark",
     "nationalwildliferefuge": "#NationalWildlifeRefuge",
+    "nature": "#Nature #NaturePhotography",
     "night": "#NightPhotography",
     "ocean": "#Ocean",
     "panoramic": "#Panorama",
@@ -68,6 +71,7 @@ keywords_map = {
     "scenic": "#ScenicPhotography",
     "seascape": "#SeascapePhotography",
     "shorebird": "#ShoreBird",
+    "tree": "#TreesOfPixelfed",
     "sky": "#Sky",
     "spring": "#Spring",
     "statepark": "#StatePark",
@@ -90,8 +94,10 @@ def IsDay(day_of_the_week):
 keyword_conditional_map = {
     "dog": (IsDay(0), "#MonDog"),
     "blackandwhite": (IsDay(0), "#MonochromeMonday"),
+    "minimalism": (IsDay(0), "#MinimalismMonday"),
     "mountain": (IsDay(0), "#MountainMonday"),
     "mountains": (IsDay(0), "#MountainMonday"),
+    "fungus": (IsDay(0), "#MushroomMonday"),
     "pattern": (IsDay(1), "#TextureTuesday"),
     "patterns": (IsDay(1), "#TextureTuesday"),
     "texture": (IsDay(1), "#TextureTuesday"),
@@ -99,18 +105,24 @@ keyword_conditional_map = {
     "ocean": (IsDay(2), "#OceanWednesday #MeerMittwoch"),
     "water": (IsDay(2), "#WaterOnWednesday"),
     "waterfall": (IsDay(2), "#WaterfallWednesday"),
-    "wildlife": (IsDay(2), "#WildlifeWednesday"),
     "waves": (IsDay(2), "#WavyWednesday"),
-    "door": (IsDay(3), "#DoorsDay"),
+    "cat": (IsDay(2), "#WhiskersWednesday "),
+    "wildlife": (IsDay(2), "#WildlifeWednesday"),
+    "door": (IsDay(3), "#DoorsDay #AdoorableThursday"),
+    "bird": (IsDay(3), "#BirbsDay"),
     "tree": (IsDay(3), "#ThickTrunkThursday"),
+    "Historic": (IsDay(3), "#ThrowbackThursday"),
     "fern": (IsDay(4), "#FernsOnFriday"),
     "flower": (IsDay(4), "#FlowerFriday"),
     "fungus": (IsDay(4), "#FungiFriday"),
+    "fujifilm": (IsDay(4), "#FujiFriday"),
     "mushroom": (IsDay(4), "#FungiFriday"),
+    "hiking": (IsDay(4), "#FootPathFriday"),
     "path": (IsDay(4), "#FootPathFriday"),
     "trail": (IsDay(4), "#FootPathFriday"),
     "window": (IsDay(4), "#FensterFreitag #WindowFriday"),
     "cat": (IsDay(5), "#Caturday"),
+    "ship": (IsDay(5), "#ShipSaturday #SchiffsSamstag"),
     "landscape": (IsDay(5), "#SaturdayScenery"),
     "fog": (IsDay(6), "#SilentSunday"),
     "moody": (IsDay(6), "#SilentSunday")
@@ -194,7 +206,7 @@ country_code_map = {
 }
 
 day_of_the_week = {
-    0: "#PhotoMonday"
+    0: "#PhotoMonday #FotoMontag"
 }
 
 
@@ -289,8 +301,10 @@ def main(argv):
     if args.data:
         posting_notes +=  f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO\n\n"
 
+    camera_make = metadata.get_exif('Make').lower()
+
     hash_tags = base_hash_tags
-    for keyword in metadata.get_iptc('Keywords') or []:
+    for keyword in (metadata.get_iptc('Keywords') + [camera_make]) or [camera_make]:
         keyword_decoded = keyword.lower()
         hash_tag = keywords_map.get(keyword_decoded)
         if hash_tag:
@@ -299,7 +313,7 @@ def main(argv):
         if test:
             hash_tags += " " + hash_tag
 
-    camera_hash_tag = camera_hash_map.get(metadata.get_exif('Make').lower())
+    camera_hash_tag = camera_hash_map.get(camera_make)
     if camera_hash_tag:
         hash_tags += " " + camera_hash_tag
 
@@ -332,11 +346,11 @@ def main(argv):
 
     description_txt = metadata.get_xmp("ExtDescrAccessibility")
     if description_txt:
-        posting_notes += "\n\n" + description_txt + "\n\n"
+        posting_notes += description_txt + "\n\n"
 
     if args.critique:
         hash_tags += " #PhotoCritique"
-        posting_notes += 'Critiques welcome. Thanks for taking the time to look at my photo.\n\n'
+        posting_notes += 'Critiques welcome. Thank you for taking the time to look at my photo.\n\n'
 
     if args.tags:
         posting_notes += hash_tags
