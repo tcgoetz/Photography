@@ -28,6 +28,7 @@ camera_hash_map = {
 #
 keywords_map = {
     "adaptedlens": "#AdaptedLens",
+    "architecture": "#architecture",
     "astronomy": "#astronomy #AstroPhotography",
     "beach": "#BeachPhotography",
     "bird": "#bird #BirdPhotography",
@@ -67,7 +68,7 @@ keywords_map = {
     "portrait": "#PortraitPhotography",
     "reflection": "#Reflection",
     "sailboat": "#Sailboat",
-    "saltmarsh": "#Saltmarsh",
+    "saltmarsh": "#Saltmarsh #MarshMadness",
     "scenic": "#ScenicPhotography",
     "seascape": "#SeascapePhotography",
     "shorebird": "#ShoreBird",
@@ -302,9 +303,10 @@ def main(argv):
         posting_notes +=  f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO\n\n"
 
     camera_make = metadata.get_exif('Make').lower()
+    keywords = metadata.get_iptc('Keywords') or []
 
     hash_tags = base_hash_tags
-    for keyword in (metadata.get_iptc('Keywords') + [camera_make]) or [camera_make]:
+    for keyword in (keywords + [camera_make]) or [camera_make]:
         keyword_decoded = keyword.lower()
         hash_tag = keywords_map.get(keyword_decoded)
         if hash_tag:
