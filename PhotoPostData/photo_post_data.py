@@ -47,7 +47,6 @@ keywords_map = {
     "flowers": "#Flowers #BloomScrolling",
     "garden": "#Garden #GardenPhotography",
     "goldenhour": "#GoldenHour",
-    "handheld": "#HandHeld",
     "hdr": "#hdr",
     "hiking": "#Hiking",
     "historic": "#Historic",
@@ -56,6 +55,7 @@ keywords_map = {
     "landscape": "#LandscapePhotography",
     "lighthouse": "#Lighthouse",
     "macro": "#MacroPhotography",
+    "marsh": "#MarshMadness",
     "mountain": "#Mountains",
     "mountains": "#Mountains",
     "nationalforest": "#NationalForest",
@@ -107,12 +107,13 @@ keyword_conditional_map = {
     "water": (IsDay(2), "#WaterOnWednesday"),
     "waterfall": (IsDay(2), "#WaterfallWednesday"),
     "waves": (IsDay(2), "#WavyWednesday"),
-    "cat": (IsDay(2), "#WhiskersWednesday "),
+    "cat": (IsDay(2), "#WhiskersWednesday"),
+    "dog": (IsDay(2), "#WhiskersWednesday"),
     "wildlife": (IsDay(2), "#WildlifeWednesday"),
     "door": (IsDay(3), "#DoorsDay #AdoorableThursday"),
     "bird": (IsDay(3), "#BirbsDay"),
     "tree": (IsDay(3), "#ThickTrunkThursday"),
-    "Historic": (IsDay(3), "#ThrowbackThursday"),
+    "nostalgic": (IsDay(3), "#ThrowbackThursday"),
     "fern": (IsDay(4), "#FernsOnFriday"),
     "flower": (IsDay(4), "#FlowerFriday"),
     "fungus": (IsDay(4), "#FungiFriday"),
@@ -123,6 +124,8 @@ keyword_conditional_map = {
     "trail": (IsDay(4), "#FootPathFriday"),
     "window": (IsDay(4), "#FensterFreitag #WindowFriday"),
     "cat": (IsDay(5), "#Caturday"),
+    "cemetery": (IsDay(5), "#SpookySaturday"),
+    "grave": (IsDay(5), "#SpookySaturday"),
     "ship": (IsDay(5), "#ShipSaturday #SchiffsSamstag"),
     "landscape": (IsDay(5), "#SaturdayScenery"),
     "fog": (IsDay(6), "#SilentSunday"),
@@ -299,8 +302,12 @@ def main(argv):
     shutter_speed = Fraction(float(metadata.get_exif('ExposureTime'))).limit_denominator()
     lens = lens_map.get(metadata.get_exif('LensModel'), metadata.get_exif('LensModel'))
     camera = camera_map.get(metadata.get_exif('Model'), metadata.get_exif('Model'))
+    flash = metadata.get_exif('Flash')
     if args.data:
-        posting_notes +=  f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO\n\n"
+        posting_notes +=  f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO"
+        if flash > 0:
+            posting_notes += " with flash"
+        posting_notes += "\n\n"
 
     camera_make = metadata.get_exif('Make').lower()
     keywords = metadata.get_iptc('Keywords') or []
@@ -332,7 +339,7 @@ def main(argv):
     if args.gps and not private_place:
         lat = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLatitude'), metadata.get_exif('GPSLatitudeRef'))
         long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
-        posting_notes += f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n\n"
+        posting_notes += f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n"
 
     copyright = metadata.get_iptc("CopyrightNotice")
     if args.copyright and copyright:
@@ -348,11 +355,11 @@ def main(argv):
 
     description_txt = metadata.get_xmp("ExtDescrAccessibility")
     if description_txt:
-        posting_notes += description_txt + "\n\n"
+        posting_notes += description_txt + "\n"
 
     if args.critique:
         hash_tags += " #PhotoCritique"
-        posting_notes += 'Critiques welcome. Thank you for taking the time to look at my photo.\n\n'
+        posting_notes += '\nCritiques welcome. Thank you for taking the time to look at my photo.\n\n'
 
     if args.tags:
         posting_notes += hash_tags
