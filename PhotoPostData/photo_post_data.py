@@ -14,6 +14,7 @@ from fractions import Fraction
 import datetime
 import exiftool
 import json
+from enum import IntEnum
 
 
 camera_hash_map = {
@@ -31,7 +32,7 @@ keywords_map = {
     "architecture": "#architecture",
     "astronomy": "#astronomy #AstroPhotography",
     "beach": "#BeachPhotography",
-    "bird": "#bird #BirdPhotography",
+    "bird": "#bird #BirdPhotography #BirdsOfFediverse",
     "blackandwhite": "#BlackAndWhitePhotography",
     "canoe": "#paddling",
     "capecod": "#CapeCod",
@@ -48,21 +49,24 @@ keywords_map = {
     "garden": "#Garden #GardenPhotography",
     "goldenhour": "#GoldenHour",
     "hdr": "#hdr",
-    "hiking": "#Hiking",
+    "hiking": "#Hiking #optOutside",
     "historic": "#Historic",
     "kayak": "#Paddling",
     "lake": "#Lake",
     "landscape": "#LandscapePhotography",
     "lighthouse": "#Lighthouse",
     "macro": "#MacroPhotography",
-    "marsh": "#MarshMadness",
     "mountain": "#Mountains",
     "mountains": "#Mountains",
     "nationalforest": "#NationalForest",
     "nationalpark": "#NationalPark",
+    "nationalseashore": "#NationalSeashore",
     "nationalwildliferefuge": "#NationalWildlifeRefuge",
     "nature": "#Nature #NaturePhotography",
     "night": "#NightPhotography",
+    "moss": "#Mosstodon #LichenSubscribe",
+    "obx": "#OuterBanks",
+    "outerbanks": "#OuterBanks",
     "ocean": "#Ocean",
     "panoramic": "#Panorama",
     "portrait": "#PortraitPhotography",
@@ -87,121 +91,161 @@ keywords_map = {
     "wmnf": "#WhiteMountainNationalForest"
 }
 
+class DayName(IntEnum):
+    Monday = 0
+    Tuesday = 1
+    Wednesday = 2
+    Thursday = 3
+    Friday = 4
+    Saturday = 5
+    Sunday = 6
+
 
 def IsDay(day_of_the_week):
     return (datetime.datetime.today().weekday() == day_of_the_week)
 
+class MonthName(IntEnum):
+    January = 1
+    February = 2
+    March = 3
+    April = 4
+    May = 5
+    June = 6
+    July = 7
+    August = 8
+    September = 9
+    October = 10
+    November = 11
+    December = 12
+
+
+def IsMonth(month):
+    return (datetime.datetime.today().month == month)
+
 
 keyword_conditional_map = {
-    "dog": (IsDay(0), "#MonDog"),
-    "blackandwhite": (IsDay(0), "#MonochromeMonday"),
-    "minimalism": (IsDay(0), "#MinimalismMonday"),
-    "mountain": (IsDay(0), "#MountainMonday"),
-    "mountains": (IsDay(0), "#MountainMonday"),
-    "fungus": (IsDay(0), "#MushroomMonday"),
-    "pattern": (IsDay(1), "#TextureTuesday"),
-    "patterns": (IsDay(1), "#TextureTuesday"),
-    "texture": (IsDay(1), "#TextureTuesday"),
-    "turtle": (IsDay(1), "#TurtleTuesday"),
-    "macro": (IsDay(2), "#MacroMittwoch"),
-    "ocean": (IsDay(2), "#OceanWednesday #MeerMittwoch"),
-    "water": (IsDay(2), "#WaterOnWednesday"),
-    "waterfall": (IsDay(2), "#WaterfallWednesday"),
-    "waves": (IsDay(2), "#WavyWednesday"),
-    "cat": (IsDay(2), "#WhiskersWednesday"),
-    "dog": (IsDay(2), "#WhiskersWednesday"),
-    "wildlife": (IsDay(2), "#WildlifeWednesday"),
-    "wildflower": (IsDay(2), "#WildflowerWednesday"),
-    "door": (IsDay(3), "#DoorsDay #AdoorableThursday"),
-    "bird": (IsDay(3), "#BirbsDay"),
-    "tree": (IsDay(3), "#ThickTrunkThursday"),
-    "nostalgic": (IsDay(3), "#ThrowbackThursday"),
-    "fern": (IsDay(4), "#FernsOnFriday"),
-    "flower": (IsDay(4), "#FlowerFriday"),
-    "fungus": (IsDay(4), "#FungiFriday"),
-    "fujifilm": (IsDay(4), "#FujiFriday"),
-    "mushroom": (IsDay(4), "#FungiFriday"),
-    "hiking": (IsDay(4), "#FootPathFriday"),
-    "path": (IsDay(4), "#FootPathFriday"),
-    "trail": (IsDay(4), "#FootPathFriday"),
-    "window": (IsDay(4), "#FensterFreitag #WindowFriday"),
-    "cat": (IsDay(5), "#Caturday"),
-    "cemetery": (IsDay(5), "#SpookySaturday"),
-    "grave": (IsDay(5), "#SpookySaturday"),
-    "ship": (IsDay(5), "#ShipSaturday #SchiffsSamstag"),
-    "landscape": (IsDay(5), "#SaturdayScenery"),
-    "fog": (IsDay(6), "#SilentSunday"),
-    "moody": (IsDay(6), "#SilentSunday")
+    "dog": (IsDay(DayName.Monday), "#MonDog"),
+    "blackandwhite": (IsDay(DayName.Monday), "#MonochromeMonday"),
+    "car": (IsDay(DayName.Monday), "#MotoringMonday"),
+    "minimalism": (IsDay(DayName.Monday), "#MinimalismMonday"),
+    "macro": (IsDay(DayName.Monday), "#MacroMonday"),
+    "mountain": (IsDay(DayName.Monday), "#MountainMonday"),
+    "mountains": (IsDay(DayName.Monday), "#MountainMonday"), 
+    "mosaic": (IsDay(DayName.Monday), "#MosaicMonday"),
+    "car": (IsDay(DayName.Monday), "#MotoringMonday"),
+    "road": (IsDay(DayName.Monday), "#MotoringMonday"),
+    "fungus": (IsDay(DayName.Monday), "#MushroomMonday"),
+    "bee": (IsDay(DayName.Tuesday), "#Bienstag"),
+    "pattern": (IsDay(DayName.Tuesday), "#TextureTuesday"),
+    "patterns": (IsDay(DayName.Tuesday), "#TextureTuesday"),
+    "texture": (IsDay(DayName.Tuesday), "#TextureTuesday"),
+    "tree": (IsDay(DayName.Tuesday), "#ThickTrunkTuesday #TreesonTuesday"),
+    "turtle": (IsDay(DayName.Tuesday), "#TurtleTuesday"),
+    "train": (IsDay(DayName.Tuesday), "#TrainTrackTuesday"),
+    "ocean": (IsDay(DayName.Wednesday), "#OceanWednesday #MeerMittwoch"),
+    "water": (IsDay(DayName.Wednesday), "#WaterOnWednesday"),
+    "waterfall": (IsDay(DayName.Wednesday), "#WaterfallWednesday"),
+    "waves": (IsDay(DayName.Wednesday), "#WavyWednesday"),
+    "cat": (IsDay(DayName.Wednesday), "#WhiskersWednesday"),
+    "dog": (IsDay(DayName.Wednesday), "#WhiskersWednesday"),
+    "wildlife": (IsDay(DayName.Wednesday), "#WildlifeWednesday"),
+    "wildflower": (IsDay(DayName.Wednesday), "#WildflowerWednesday"),
+    "door": (IsDay(DayName.Thursday), "#DoorsDay #AdoorableThursday"),
+    "bird": (IsDay(DayName.Thursday), "#BirbsDay"),
+    "nostalgic": (IsDay(DayName.Thursday), "#ThrowbackThursday"),
+    "thunder": (IsDay(DayName.Thursday), "#ThunderThursday"),
+    "storm": (IsDay(DayName.Thursday), "#ThunderThursday"),
+    "travel": (IsDay(DayName.Thursday), "#TravelThursday"),
+    "car": (IsDay(DayName.Friday), "#FourWheelFriday"),
+    "fern": (IsDay(DayName.Friday), "#FernsOnFriday"),
+    "flower": (IsDay(DayName.Friday), "#FlowerFriday #FlowersOnFriday"),
+    "fossil": (IsDay(DayName.Friday), "#FossilFriday"),
+    "fungus": (IsDay(DayName.Friday), "#FungiFriday"),
+    "fujifilm": (IsDay(DayName.Friday), "#FujiFriday"),
+    "mushroom": (IsDay(DayName.Friday), "#FungiFriday"),
+    "hiking": (IsDay(DayName.Friday), "#FootPathFriday"),
+    "path": (IsDay(DayName.Friday), "#FootPathFriday"),
+    "trail": (IsDay(DayName.Friday), "#FootPathFriday"),
+    "window": (IsDay(DayName.Friday), "#FensterFreitag #WindowFriday"),
+    "cat": (IsDay(DayName.Saturday), "#Caturday"),
+    "cemetery": (IsDay(DayName.Saturday), "#SpookySaturday"),
+    "grave": (IsDay(DayName.Saturday), "#SpookySaturday"),
+    "ship": (IsDay(DayName.Saturday), "#ShipSaturday #SchiffsSamstag"),
+    "landscape": (IsDay(DayName.Saturday), "#SaturdayScenery"),
+    "fog": (IsDay(DayName.Sunday), "#SilentSunday"),
+    "moody": (IsDay(DayName.Sunday), "#SilentSunday"),
+    # Months
+    "marsh": (IsMonth(MonthName.March), "#MarshMadness")
 }
 
-
+ 
 #
 # Adds hashtags for US states.
 #
 state_map = {
-        'AK': '#alaska',
-        'AL': '#alabama',
-        'AR': '#arkansas',
-        'AS': '#AmericanSamoa',
-        'AZ': '#arizona',
-        'CA': '#California',
-        'California': '#California',
-        'CO': '#colorado',
-        'CT': '#connecticut',
-        'DC': '#DistrictOfColumbia',
-        'DE': '#delaware',
-        'FL': '#florida',
-        'GA': '#georgia',
-        'GU': '#guam',
-        'HI': '#hawaii',
-        'IA': '#iowa',
-        'ID': '#idaho',
-        'IL': '#illinois',
-        'IN': '#indiana',
-        'KS': '#kansas',
-        'KY': '#kentucky',
-        'LA': '#louisiana',
-        'MA': '#Massachusetts',
-        'Massachusetts': '#Massachusetts',
-        'MD': '#maryland',
-        'ME': '#Maine',
-        'Maine': '#Maine',
-        'MI': '#Michigan',
-        'MN': '#Minnesota',
-        'MO': '#Missouri',
-        'MP': '#NorthernMarianaIslands',
-        'MS': '#Mississippi',
-        'MT': '#Montana',
-        'NA': '#national',
-        'NC': '#NorthCarolina',
-        'North Carolina': '#NorthCarolina',
-        'ND': '#NorthDakota',
-        'NE': '#Nebraska',
-        'NH': '#NewHampshire',
-        'New Hampshire': '#NewHampshire',
-        'NJ': '#NewJersey',
-        'NM': '#NewMexico',
-        'NV': '#Nevada',
-        'NY': '#NewYork',
-        'OH': '#Ohio',
-        'OK': '#Oklahoma',
-        'OR': '#Oregon',
-        "Oregon": "#Oregon",
-        'PA': '#Pennsylvania',
-        'PR': '#PuertoRico',
-        'RI': '#RhodeIsland',
-        'SC': '#SouthCarolina',
-        'SD': '#SouthdDkota',
-        'TN': '#Tennessee',
-        'TX': '#Texas',
-        'UT': '#Utah',
-        'VA': '#Virginia',
-        'VI': '#VirginsIslands',
-        'VT': '#Vermont',
-        'WA': '#Washington',
-        'WI': '#Wisconsin',
-        'WV': '#WestVirginia',
-        'WY': '#Wyoming'
+    'AK': '#alaska',
+    'AL': '#alabama',
+    'AR': '#arkansas',
+    'AS': '#AmericanSamoa',
+    'AZ': '#arizona',
+    'CA': '#California',
+    'California': '#California',
+    'CO': '#colorado',
+    'CT': '#connecticut',
+    'DC': '#DistrictOfColumbia',
+    'DE': '#delaware',
+    'FL': '#florida',
+    'GA': '#georgia',
+    'GU': '#guam',
+    'HI': '#hawaii',
+    'IA': '#iowa',
+    'ID': '#idaho',
+    'IL': '#illinois',
+    'IN': '#indiana',
+    'KS': '#kansas',
+    'KY': '#kentucky',
+    'LA': '#louisiana',
+    'MA': '#Massachusetts',
+    'Massachusetts': '#Massachusetts',
+    'MD': '#maryland',
+    'ME': '#Maine',
+    'Maine': '#Maine',
+    'MI': '#Michigan',
+    'MN': '#Minnesota',
+    'MO': '#Missouri',
+    'MP': '#NorthernMarianaIslands',
+    'MS': '#Mississippi',
+    'MT': '#Montana',
+    'NA': '#national',
+    'NC': '#NorthCarolina',
+    'North Carolina': '#NorthCarolina',
+    'ND': '#NorthDakota',
+    'NE': '#Nebraska',
+    'NH': '#NewHampshire',
+    'New Hampshire': '#NewHampshire',
+    'NJ': '#NewJersey',
+    'NM': '#NewMexico',
+    'NV': '#Nevada',
+    'NY': '#NewYork',
+    'OH': '#Ohio',
+    'OK': '#Oklahoma',
+    'OR': '#Oregon',
+    "Oregon": "#Oregon",
+    'PA': '#Pennsylvania',
+    'PR': '#PuertoRico',
+    'RI': '#RhodeIsland',
+    'SC': '#SouthCarolina',
+    'SD': '#SouthdDkota',
+    'TN': '#Tennessee',
+    'TX': '#Texas',
+    'UT': '#Utah',
+    'VA': '#Virginia',
+    'VI': '#VirginsIslands',
+    'VT': '#Vermont',
+    'WA': '#Washington',
+    'WI': '#Wisconsin',
+    'WV': '#WestVirginia',
+    'WY': '#Wyoming'
 }
 
 
@@ -295,21 +339,29 @@ def main(argv):
     country = metadata.get_iptc('Country-PrimaryLocationName')
     country_code = metadata.get_iptc('Country-PrimaryLocationCode')
     private_place = sublocation in private_places
-    if private_place:
-        posting_notes += '\n' + f"{city}, {state}, {country}\n\n"
-    else:
-        posting_notes += '\n' + f"{sublocation}, {city}, {state}, {country}\n\n"
+    posting_notes += '\n'
+    if not private_place and sublocation:
+        posting_notes += f"{sublocation}, "
+    if city:
+        posting_notes += f"{city}, "
+    if state:
+        posting_notes += f"{state}, "
+    if country:
+        posting_notes += f"{country} "
+    posting_notes += '\n\n'
+
+    if args.gps and not private_place:
+        lat = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLatitude'), metadata.get_exif('GPSLatitudeRef'))
+        long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
+        if lat and long:
+            posting_notes += f"https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}"
+    posting_notes += '\n\n'
 
     when_taken = datetime.datetime.strptime(metadata.get_exif('DateTimeOriginal'), "%Y:%m:%d %H:%M:%S")
     shutter_speed = Fraction(float(metadata.get_exif('ExposureTime'))).limit_denominator()
     lens = lens_map.get(metadata.get_exif('LensModel'), metadata.get_exif('LensModel'))
     camera = camera_map.get(metadata.get_exif('Model'), metadata.get_exif('Model'))
     flash = metadata.get_exif('Flash')
-    if args.data:
-        posting_notes +=  f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO"
-        if flash > 0:
-            posting_notes += " with flash"
-        posting_notes += "\n\n"
 
     camera_make = metadata.get_exif('Make').lower()
     keywords = metadata.get_iptc('Keywords') or []
@@ -323,6 +375,18 @@ def main(argv):
         test, hash_tag = keyword_conditional_map.get(keyword_decoded, (None, None))
         if test:
             hash_tags += " " + hash_tag
+        if keyword_decoded == "tripod":
+            tripod = True
+        else:
+            tripod = False
+
+    if args.data:
+        posting_notes +=  f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO"
+        if flash > 0:
+            posting_notes += " with flash"
+        if tripod:
+            posting_notes += " supported by a tripod"
+        posting_notes += "\n\n"
 
     camera_hash_tag = camera_hash_map.get(camera_make)
     if camera_hash_tag:
@@ -338,11 +402,6 @@ def main(argv):
     if country_hash_tag:
         hash_tags += " " + country_hash_tag
 
-    if args.gps and not private_place:
-        lat = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLatitude'), metadata.get_exif('GPSLatitudeRef'))
-        long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
-        posting_notes += f"Photo location: https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}\n"
-
     copyright = metadata.get_iptc("CopyrightNotice")
     if args.copyright and copyright:
         copyright = f"\n{copyright}. All rights reserved."
@@ -357,11 +416,11 @@ def main(argv):
 
     description_txt = metadata.get_xmp("ExtDescrAccessibility")
     if description_txt:
-        posting_notes += description_txt + "\n"
+        posting_notes += description_txt + "\n\n"
 
     if args.critique:
         hash_tags += " #PhotoCritique"
-        posting_notes += '\nCritiques welcome. Thank you for taking the time to look at my photo.\n\n'
+        posting_notes += 'Critiques welcome. Thank you for taking the time to look at my photo.\n\n'
 
     if args.tags:
         posting_notes += hash_tags
