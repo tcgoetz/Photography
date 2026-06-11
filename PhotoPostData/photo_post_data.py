@@ -32,6 +32,7 @@ keywords_map = {
     "architecture": "#architecture",
     "astronomy": "#astronomy #AstroPhotography",
     "beach": "#BeachPhotography",
+    "bee": "#Bee",
     "bird": "#bird #BirdPhotography #BirdsOfFediverse",
     "blackandwhite": "#BlackAndWhitePhotography",
     "canoe": "#paddling",
@@ -72,7 +73,7 @@ keywords_map = {
     "portrait": "#PortraitPhotography",
     "reflection": "#Reflection",
     "sailboat": "#Sailboat",
-    "saltmarsh": "#Saltmarsh #MarshMadness",
+    "saltmarsh": "#Saltmarsh",
     "scenic": "#ScenicPhotography",
     "seascape": "#SeascapePhotography",
     "shorebird": "#ShoreBird",
@@ -139,10 +140,10 @@ keyword_conditional_map = {
     "pattern": (IsDay(DayName.Tuesday), "#TextureTuesday"),
     "patterns": (IsDay(DayName.Tuesday), "#TextureTuesday"),
     "texture": (IsDay(DayName.Tuesday), "#TextureTuesday"),
-    "tree": (IsDay(DayName.Tuesday), "#ThickTrunkTuesday #TreesonTuesday"),
+    "tree": (IsDay(DayName.Tuesday), "#ThickTrunkTuesday #TreesOnTuesday"),
     "turtle": (IsDay(DayName.Tuesday), "#TurtleTuesday"),
     "train": (IsDay(DayName.Tuesday), "#TrainTrackTuesday"),
-    "ocean": (IsDay(DayName.Wednesday), "#OceanWednesday #MeerMittwoch"),
+    "ocean": (IsDay(DayName.Wednesday), "#SeaWednesday #MeerMittwoch"),
     "water": (IsDay(DayName.Wednesday), "#WaterOnWednesday"),
     "waterfall": (IsDay(DayName.Wednesday), "#WaterfallWednesday"),
     "waves": (IsDay(DayName.Wednesday), "#WavyWednesday"),
@@ -170,6 +171,7 @@ keyword_conditional_map = {
     "cat": (IsDay(DayName.Saturday), "#Caturday"),
     "cemetery": (IsDay(DayName.Saturday), "#SpookySaturday"),
     "grave": (IsDay(DayName.Saturday), "#SpookySaturday"),
+    "insect": (IsDay(DayName.Saturday), "#InsectSaturday #InsectenSamstag"),
     "ship": (IsDay(DayName.Saturday), "#ShipSaturday #SchiffsSamstag"),
     "landscape": (IsDay(DayName.Saturday), "#SaturdayScenery"),
     "fog": (IsDay(DayName.Sunday), "#SilentSunday"),
@@ -241,7 +243,7 @@ state_map = {
     'UT': '#Utah',
     'VA': '#Virginia',
     'VI': '#VirginsIslands',
-    'VT': '#Vermont',
+    'Vermont': '#Vermont',
     'WA': '#Washington',
     'WI': '#Wisconsin',
     'WV': '#WestVirginia',
@@ -255,8 +257,15 @@ country_code_map = {
     "IE": "#Ireland"
 }
 
+
 day_of_the_week = {
     0: "#PhotoMonday #FotoMontag"
+}
+
+
+boolean_to_yes_no = {
+    True: "yes",
+    False: "no"
 }
 
 
@@ -319,6 +328,8 @@ def main(argv):
     base_hash_tags = config.get('base_hash_tags', "")
     # Maps camera names in EXIF to more friendly names. If the camera name in EXIF is not found here, the value from EXIF will be used.
     camera_map = config.get('camera_map', {})
+    # Maps camera names in EXIF to camera crop factor.
+    camera_crop_factor_map = config.get('camera_crop_factor_map', {})
     # Maps lens names in EXIF to more friendly names. If the lens name in EXIF is not found here, the value from EXIF will be used.
     lens_map = config.get('lens_map', {})
     # Adds hashtags for popular locations.
@@ -350,18 +361,13 @@ def main(argv):
         posting_notes += f"{country} "
     posting_notes += '\n\n'
 
-    if args.gps and not private_place:
-        lat = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLatitude'), metadata.get_exif('GPSLatitudeRef'))
-        long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
-        if lat and long:
-            posting_notes += f"https://www.openstreetmap.org/#map={args.mapzoom}/{lat}/{long}"
-    posting_notes += '\n\n'
-
     when_taken = datetime.datetime.strptime(metadata.get_exif('DateTimeOriginal'), "%Y:%m:%d %H:%M:%S")
     shutter_speed = Fraction(float(metadata.get_exif('ExposureTime'))).limit_denominator()
     lens = lens_map.get(metadata.get_exif('LensModel'), metadata.get_exif('LensModel'))
     camera = camera_map.get(metadata.get_exif('Model'), metadata.get_exif('Model'))
+    camera_crop_factor = camera_crop_factor_map.get(metadata.get_exif('Model'))
     flash = metadata.get_exif('Flash')
+    tripod = False
 
     camera_make = metadata.get_exif('Make').lower()
     keywords = metadata.get_iptc('Keywords') or []
@@ -377,16 +383,14 @@ def main(argv):
             hash_tags += " " + hash_tag
         if keyword_decoded == "tripod":
             tripod = True
-        else:
-            tripod = False
 
-    if args.data:
-        posting_notes +=  f"Taken on {when_taken} with {lens} on {camera} with exposure {shutter_speed}s @ f/{metadata.get_exif('FNumber')} @ {metadata.get_exif('FocalLength')}mm @ {metadata.get_exif('ISO')} ISO"
-        if flash > 0:
-            posting_notes += " with flash"
-        if tripod:
-            posting_notes += " supported by a tripod"
-        posting_notes += "\n\n"
+    copyright = metadata.get_iptc("CopyrightNotice")
+    if args.copyright and copyright:
+        copyright = f"\n{copyright}. All rights reserved."
+    else:
+        copyright= ""
+    if args.noai:
+        copyright += " Training an AI on this image is expressly forbidden."
 
     camera_hash_tag = camera_hash_map.get(camera_make)
     if camera_hash_tag:
@@ -402,14 +406,6 @@ def main(argv):
     if country_hash_tag:
         hash_tags += " " + country_hash_tag
 
-    copyright = metadata.get_iptc("CopyrightNotice")
-    if args.copyright and copyright:
-        copyright = f"\n{copyright}. All rights reserved."
-    else:
-        copyright= ""
-    if args.noai:
-        copyright += " Training an AI on this image is expressly forbidden."
-
     day_hash = day_of_the_week.get(datetime.datetime.today().weekday())
     if day_hash:
         hash_tags += " " + day_hash
@@ -421,6 +417,29 @@ def main(argv):
     if args.critique:
         hash_tags += " #PhotoCritique"
         posting_notes += 'Critiques welcome. Thank you for taking the time to look at my photo.\n\n'
+
+
+    if args.data:
+        focal_length_int = metadata.get_exif('FocalLength')
+        focal_length = f"{focal_length_int}mm"
+        focal_length_35mm_equiv = metadata.get_exif('FocalLengthIn35mmFormat')
+        if not focal_length_35mm_equiv:
+            if camera_crop_factor:
+                focal_length_35mm_equiv = int(focal_length_int * camera_crop_factor)
+        posting_notes +=  f"Date and time: {when_taken}\n"
+        if args.gps and not private_place:
+            lat = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLatitude'), metadata.get_exif('GPSLatitudeRef'))
+            long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
+            if lat and long:
+                posting_notes += f"Location: https://www.openstreetmap.org/?mlat={lat}&mlon={long}#map={args.mapzoom}/{lat}/{long}\n"
+        posting_notes += f"Camera: {camera}\n"
+        posting_notes += f"Lens: {lens}\n"
+        posting_notes += f"Exposure: {shutter_speed}s @ f/{metadata.get_exif('FNumber')}\n"
+        posting_notes += f"Focal length: {focal_length}\n"
+        posting_notes += f"35mm equivalent focal length: {focal_length_35mm_equiv}mm\n"
+        posting_notes += f"ISO: {metadata.get_exif('ISO')}\n"
+        posting_notes += f"Flash: {boolean_to_yes_no[flash > 0]}\n"
+        posting_notes += f"Tripod: {boolean_to_yes_no[tripod]}\n\n"
 
     if args.tags:
         posting_notes += hash_tags
