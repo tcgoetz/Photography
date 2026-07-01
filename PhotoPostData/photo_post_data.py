@@ -52,6 +52,7 @@ keywords_map = {
     "hdr": "#hdr",
     "hiking": "#Hiking #optOutside",
     "historic": "#Historic",
+    "insect": "#bugscrolling",
     "kayak": "#Paddling",
     "lake": "#Lake",
     "landscape": "#LandscapePhotography",
@@ -125,59 +126,54 @@ def IsMonth(month):
 
 
 keyword_conditional_map = {
-    "dog": (IsDay(DayName.Monday), "#MonDog"),
-    "blackandwhite": (IsDay(DayName.Monday), "#MonochromeMonday"),
-    "car": (IsDay(DayName.Monday), "#MotoringMonday"),
-    "minimalism": (IsDay(DayName.Monday), "#MinimalismMonday"),
-    "macro": (IsDay(DayName.Monday), "#MacroMonday"),
-    "mountain": (IsDay(DayName.Monday), "#MountainMonday"),
-    "mountains": (IsDay(DayName.Monday), "#MountainMonday"), 
-    "mosaic": (IsDay(DayName.Monday), "#MosaicMonday"),
-    "car": (IsDay(DayName.Monday), "#MotoringMonday"),
-    "road": (IsDay(DayName.Monday), "#MotoringMonday"),
-    "fungus": (IsDay(DayName.Monday), "#MushroomMonday"),
-    "bee": (IsDay(DayName.Tuesday), "#Bienstag"),
-    "pattern": (IsDay(DayName.Tuesday), "#TextureTuesday"),
-    "patterns": (IsDay(DayName.Tuesday), "#TextureTuesday"),
-    "texture": (IsDay(DayName.Tuesday), "#TextureTuesday"),
-    "tree": (IsDay(DayName.Tuesday), "#ThickTrunkTuesday #TreesOnTuesday"),
-    "turtle": (IsDay(DayName.Tuesday), "#TurtleTuesday"),
-    "train": (IsDay(DayName.Tuesday), "#TrainTrackTuesday"),
-    "ocean": (IsDay(DayName.Wednesday), "#SeaWednesday #MeerMittwoch"),
-    "water": (IsDay(DayName.Wednesday), "#WaterOnWednesday"),
-    "waterfall": (IsDay(DayName.Wednesday), "#WaterfallWednesday"),
-    "waves": (IsDay(DayName.Wednesday), "#WavyWednesday"),
-    "cat": (IsDay(DayName.Wednesday), "#WhiskersWednesday"),
-    "dog": (IsDay(DayName.Wednesday), "#WhiskersWednesday"),
-    "wildlife": (IsDay(DayName.Wednesday), "#WildlifeWednesday"),
-    "wildflower": (IsDay(DayName.Wednesday), "#WildflowerWednesday"),
-    "door": (IsDay(DayName.Thursday), "#DoorsDay #AdoorableThursday"),
-    "bird": (IsDay(DayName.Thursday), "#BirbsDay"),
-    "nostalgic": (IsDay(DayName.Thursday), "#ThrowbackThursday"),
-    "thunder": (IsDay(DayName.Thursday), "#ThunderThursday"),
-    "storm": (IsDay(DayName.Thursday), "#ThunderThursday"),
-    "travel": (IsDay(DayName.Thursday), "#TravelThursday"),
-    "car": (IsDay(DayName.Friday), "#FourWheelFriday"),
-    "fern": (IsDay(DayName.Friday), "#FernsOnFriday"),
-    "flower": (IsDay(DayName.Friday), "#FlowerFriday #FlowersOnFriday"),
-    "fossil": (IsDay(DayName.Friday), "#FossilFriday"),
-    "fungus": (IsDay(DayName.Friday), "#FungiFriday"),
-    "fujifilm": (IsDay(DayName.Friday), "#FujiFriday"),
-    "mushroom": (IsDay(DayName.Friday), "#FungiFriday"),
-    "hiking": (IsDay(DayName.Friday), "#FootPathFriday"),
-    "path": (IsDay(DayName.Friday), "#FootPathFriday"),
-    "trail": (IsDay(DayName.Friday), "#FootPathFriday"),
-    "window": (IsDay(DayName.Friday), "#FensterFreitag #WindowFriday"),
-    "cat": (IsDay(DayName.Saturday), "#Caturday"),
-    "cemetery": (IsDay(DayName.Saturday), "#SpookySaturday"),
-    "grave": (IsDay(DayName.Saturday), "#SpookySaturday"),
-    "insect": (IsDay(DayName.Saturday), "#InsectSaturday #InsectenSamstag"),
-    "ship": (IsDay(DayName.Saturday), "#ShipSaturday #SchiffsSamstag"),
-    "landscape": (IsDay(DayName.Saturday), "#SaturdayScenery"),
-    "fog": (IsDay(DayName.Sunday), "#SilentSunday"),
-    "moody": (IsDay(DayName.Sunday), "#SilentSunday"),
-    # Months
-    "marsh": (IsMonth(MonthName.March), "#MarshMadness")
+    "bee": [(IsDay(DayName.Tuesday), "#Bienstag")],
+    "blackandwhite": [(IsDay(DayName.Monday), "#MonochromeMonday")],
+    "bird": [(IsDay(DayName.Thursday), "#BirbsDay")],
+    "cat": [(IsDay(DayName.Wednesday), "#WhiskersWednesday"), (IsDay(DayName.Saturday), "#Caturday")],
+    "car": [(IsDay(DayName.Monday), "#MotoringMonday"), (IsDay(DayName.Friday), "#FourWheelFriday")],
+    "cemetery": [(IsDay(DayName.Saturday), "#SpookySaturday")],
+    "dog": [(IsDay(DayName.Monday), "#MonDog"), (IsDay(DayName.Wednesday), "#WhiskersWednesday")],
+    "door": [(IsDay(DayName.Thursday), "#DoorsDay #AdoorableThursday")],
+    "fern": [(IsDay(DayName.Friday), "#FernsOnFriday")],
+    "flower": [(IsDay(DayName.Friday), "#FlowerFriday #FlowersOnFriday")],
+    "flowers": [(IsDay(DayName.Friday), "#FlowerFriday #FlowersOnFriday")],
+    "fog": [(IsDay(DayName.Sunday), "#SilentSunday")],
+    "fossil": [(IsDay(DayName.Friday), "#FossilFriday")],
+    "fungus": [(IsDay(DayName.Monday), "#MushroomMonday"), (IsDay(DayName.Friday), "#FungiFriday")],
+    "fujifilm": [(IsDay(DayName.Friday), "#FujiFriday")],
+    "grave": [(IsDay(DayName.Saturday), "#SpookySaturday")],
+    "hiking": [(IsDay(DayName.Friday), "#FootPathFriday")],
+    "insect": [(IsDay(DayName.Saturday), "#InsectSaturday #InsectenSamstag")],
+    "landscape": [(IsDay(DayName.Saturday), "#SaturdayScenery")],
+    "macro": [(IsDay(DayName.Monday), "#MacroMonday"), (IsDay(DayName.Wednesday), "#MakroMittwoch")],
+    "marsh": [(IsMonth(MonthName.March), "#MarshMadness")],
+    "minimalism": [(IsDay(DayName.Monday), "#MinimalismMonday")],
+    "moody": [(IsDay(DayName.Sunday), "#SilentSunday")],
+    "mountain": [(IsDay(DayName.Monday), "#MountainMonday")],
+    "mountains": [(IsDay(DayName.Monday), "#MountainMonday")], 
+    "mosaic": [(IsDay(DayName.Monday), "#MosaicMonday")],
+    "mushroom": [(IsDay(DayName.Friday), "#FungiFriday")],
+    "nostalgic": [(IsDay(DayName.Thursday), "#ThrowbackThursday")],
+    "ocean": [(IsDay(DayName.Wednesday), "#SeaWednesday #MeerMittwoch")],
+    "path": [(IsDay(DayName.Friday), "#FootPathFriday")],
+    "pattern": [(IsDay(DayName.Tuesday), "#TextureTuesday")],
+    "patterns": [(IsDay(DayName.Tuesday), "#TextureTuesday")],
+    "road": [(IsDay(DayName.Monday), "#MotoringMonday")],
+    "ship": [(IsDay(DayName.Saturday), "#ShipSaturday #SchiffsSamstag")],
+    "sky": [(IsDay(DayName.Saturday), "#SkySaturday")],
+    "storm": [(IsDay(DayName.Thursday), "#ThunderThursday")],
+    "texture": [(IsDay(DayName.Tuesday), "#TextureTuesday")],
+    "thunder": [(IsDay(DayName.Thursday), "#ThunderThursday")],
+    "trail": [(IsDay(DayName.Friday), "#FootPathFriday")],
+    "tree": [(IsDay(DayName.Tuesday), "#ThickTrunkTuesday #TreesOnTuesday")],
+    "turtle": [(IsDay(DayName.Tuesday), "#TurtleTuesday")],
+    "train": [(IsDay(DayName.Tuesday), "#TrainTrackTuesday")],
+    "travel": [(IsDay(DayName.Thursday), "#TravelThursday")],
+    "water": [(IsDay(DayName.Wednesday), "#WaterOnWednesday")],
+    "waterfall": [(IsDay(DayName.Wednesday), "#WaterfallWednesday")],
+    "waves": [(IsDay(DayName.Wednesday), "#WavyWednesday")],
+    "wildflower": [(IsDay(DayName.Wednesday), "#WildflowerWednesday")],
+    "window": [(IsDay(DayName.Friday), "#FensterFreitag #WindowFriday")]
 }
 
  
@@ -378,9 +374,11 @@ def main(argv):
         hash_tag = keywords_map.get(keyword_decoded)
         if hash_tag:
             hash_tags += " " + hash_tag
-        test, hash_tag = keyword_conditional_map.get(keyword_decoded, (None, None))
-        if test:
-            hash_tags += " " + hash_tag
+        keyword_conditionals = keyword_conditional_map.get(keyword_decoded, [])
+        print(f"keyword_conditionals {repr(keyword_conditionals)}")
+        for (test, hash_tag) in keyword_conditionals:
+            if test:
+                hash_tags += " " + hash_tag
         if keyword_decoded == "tripod":
             tripod = True
 
