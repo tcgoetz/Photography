@@ -12,20 +12,20 @@ a pain, so I wrote a script to do it for me. Now I just paste the oputput of the
 ### Example output:
 
 > Crows Fly Over Mt Mansfield Summit - Lake Champlain in the distance.
-> Long Trail, Stowe, Vermont, United States
+> Long Trail, Stowe, Vermont, United States  
 > 
-> Critiques welcome. Thank you for taking the time to look at my photo.
+> Critiques welcome. Thank you for taking the time to look at my photo.  
 > 
-> Date and time: 2026-06-16 12:09:41
-> Location: https://www.openstreetmap.org/?mlat=44.543708&mlon=-72.814486#map=15/44.54588/-72.80704
-> Camera: Fuji X-H2
-> Lens: Fuji 16-55mm F2.8
-> Exposure: 1/300s @ f/11
-> Focal length: 16mm
-> 35mm equivalent focal length: 24mm
-> ISO: 200
-> Flash: no
-> Tripod: no
+> Date and time: 2026-06-16 12:09:41  
+> Location: https://www.openstreetmap.org/?mlat=44.543708&mlon=-72.814486#map=15/44.54588/-72.80704  
+> Camera: Fuji X-H2  
+> Lens: Fuji 16-55mm F2.8  
+> Exposure: 1/300s @ f/11  
+> Focal length: 16mm  
+> 35mm equivalent focal length: 24mm  
+> ISO: 200  
+> Flash: no  
+> Tripod: no  
 > 
 > #Photography #AmateurPhotography #MyPhoto #PhotoOfTheDay #StatePark #Clouds #Hiking #optOutside #LandscapePhotography #Mountains #MountainMonday #Spring #Weather #FujiFilm #FujiXSeries #FujiPhotography #Vermont #PhotoMonday #FotoMontag #PhotoCritique
 
