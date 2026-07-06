@@ -5,6 +5,11 @@ A script that generates text formated metadata for posting photos to photo shari
 One of the issues I had in moving from a photo sharing website like Flickr to a website like PixelFed is that Flickr displays all of the photo metadata for you. On PixelFed, you have to put all of the metadata you want to show in the description. Transcribing all of the metadata for every photo was
 a pain, so I wrote a script to do it for me. Now I just paste the oputput of the script into the description box when posting a photo.
 
+### Dependancies
+
+The scrip[t is written in [Python](https://www.python.org/) and you need Python installed.
+You need [exiftool](https://exiftool.org/) installed on your machine. I installed in with [Homebrew](https://brew.sh/) (MacOS).
+
 ### Example invocation:
 
 > python3 /Users/tgoetz/Projects/Photography/PhotoPostData/photo_post_data.py --critique --gps --alttxt --copyright --file /Users/tgoetz/Downloads/_DSF8315.jpg --output /Users/tgoetz/Downloads/_DSF8315.txt
