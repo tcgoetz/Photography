@@ -7,8 +7,8 @@ a pain, so I wrote a script to do it for me. Now I just paste the oputput of the
 
 ### Dependancies
 
-The scrip[t is written in [Python](https://www.python.org/) and you need Python installed.
-You need [exiftool](https://exiftool.org/) installed on your machine. I installed in with [Homebrew](https://brew.sh/) (MacOS).
++ The scrip[t is written in [Python](https://www.python.org/) and you need Python installed.  
++ You need [exiftool](https://exiftool.org/) installed on your machine. I installed in with [Homebrew](https://brew.sh/) (MacOS).  
 
 ### Example invocation:
 
