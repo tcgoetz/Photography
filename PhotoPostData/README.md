@@ -39,13 +39,16 @@ I have a export preset in Lightroom that uses Jeffrey Friedl's ["Run Any Command
 
 ## Data Mapping
 
-| Post Field       | Source | Source Field                                                    |
-| ---------------- | ------ | --------------------------------------------------------------- |
-| Post Title       | IPTC   | ObjectName and Caption-Abstract                                 |
-| Post Location    | IPTC   | Sub-location, City, Province-State, Country-PrimaryLocationName |
-| Post Map Link    | IPTC   | GPSLatitude, GPSLatitudeRef, GPSLongitude, GPSLongitudeRef      |
-| Camera and Lens  | EXIF   | Model, LensModel                                                |
-| Exposure Info    | EXIF   | DateTimeOriginal, ExposureTime, FNumber, FocalLength, ISO       |
-| Posting Hashtags | IPTC   | Keywords, Country-PrimaryLocationCode                           |
-| Copyright        | IPTC   | CopyrightNotice                                                 |
-| ALT Text         | XMP    | AltTextAccessibility                                            |
+| Post Field           | Source | Source Field                                                     |
+| -------------------- | ------ | ---------------------------------------------------------------- |
+| Post Title           | IPTC   | ObjectName and Caption-Abstract                                  |
+| Post Location        | IPTC   | Sub-location, City, Province-State, Country-PrimaryLocationName  |
+| Date and Time        | EXIF   | DateTimeOriginal                                                 |
+| Post Map Link        | IPTC   | GPSLatitude, GPSLatitudeRef, GPSLongitude, GPSLongitudeRef       |
+| Camera and Lens      | EXIF   | Model, LensModel                                                 |
+| Exposure Info        | EXIF   | ExposureTime, FNumber, FocalLength, ISO, Flash                   |
+| Posting Hashtags     | IPTC   | Keywords, Country-PrimaryLocationCode, day of the week from date |
+| Copyright            | IPTC   | CopyrightNotice                                                  |
+| ALT Text             | XMP    | AltTextAccessibility                                             |
+| Extended Description | XMP    | ExtDescrAccessibility                                            |
+
