@@ -27,7 +27,7 @@ camera_hash_map = {
 #
 # Reformats and filters out keywords we don't want to publish. Keyword in IPTC that are not present here, will be ignored.
 #
-keywords_map = {
+keywords_to_hastags_map = {
     "adaptedlens": "#AdaptedLens",
     "architecture": "#architecture",
     "astronomy": "#astronomy #AstroPhotography",
@@ -43,6 +43,8 @@ keywords_map = {
     "dog": "#dog #DogsOfPixelfed",
     "door": "#Door #DailyDoor",
     "fall": "#Fall",
+    "fallfoliage": "#FallFoliage",
+    "fern": "#Farnsehen",
     "fog": "#Fog",
     "foliage": "#Foliage",
     "flower": "#Flower #BloomScrolling",
@@ -50,9 +52,9 @@ keywords_map = {
     "garden": "#Garden #GardenPhotography",
     "goldenhour": "#GoldenHour",
     "hdr": "#hdr",
-    "hiking": "#Hiking #optOutside",
+    "hiking": "#Hiking #OptOutside #GetOutside @Hiking@lemmy.world",
     "historic": "#Historic",
-    "insect": "#bugscrolling",
+    "insect": "#BugScrolling",
     "kayak": "#Paddling",
     "lake": "#Lake",
     "landscape": "#LandscapePhotography",
@@ -64,9 +66,10 @@ keywords_map = {
     "nationalpark": "#NationalPark",
     "nationalseashore": "#NationalSeashore",
     "nationalwildliferefuge": "#NationalWildlifeRefuge",
-    "nature": "#Nature #NaturePhotography",
+    "nature": "#Nature #NaturePhotography @Nature@lemmy.world",
     "night": "#NightPhotography",
     "moss": "#Mosstodon #LichenSubscribe",
+    "morning": "#Morning",
     "obx": "#OuterBanks",
     "outerbanks": "#OuterBanks",
     "ocean": "#Ocean",
@@ -128,7 +131,7 @@ def IsMonth(month):
 keyword_conditional_map = {
     "bee": [(IsDay(DayName.Tuesday), "#Bienstag")],
     "blackandwhite": [(IsDay(DayName.Monday), "#MonochromeMonday")],
-    "bird": [(IsDay(DayName.Thursday), "#BirbsDay")],
+    "bird": [(IsDay(DayName.Wednesday), "#WingWednesday"), (IsDay(DayName.Thursday), "#BirbsDay")],
     "cat": [(IsDay(DayName.Wednesday), "#WhiskersWednesday"), (IsDay(DayName.Saturday), "#Caturday")],
     "car": [(IsDay(DayName.Monday), "#MotoringMonday"), (IsDay(DayName.Friday), "#FourWheelFriday")],
     "cemetery": [(IsDay(DayName.Saturday), "#SpookySaturday")],
@@ -139,6 +142,7 @@ keyword_conditional_map = {
     "flowers": [(IsDay(DayName.Friday), "#FlowerFriday #FlowersOnFriday")],
     "fog": [(IsDay(DayName.Sunday), "#SilentSunday")],
     "fossil": [(IsDay(DayName.Friday), "#FossilFriday")],
+    "fruit": [(IsDay(DayName.Friday), "#FruitFriday")],
     "fungus": [(IsDay(DayName.Monday), "#MushroomMonday"), (IsDay(DayName.Friday), "#FungiFriday")],
     "fujifilm": [(IsDay(DayName.Friday), "#FujiFriday")],
     "grave": [(IsDay(DayName.Saturday), "#SpookySaturday")],
@@ -148,11 +152,12 @@ keyword_conditional_map = {
     "macro": [(IsDay(DayName.Monday), "#MacroMonday"), (IsDay(DayName.Wednesday), "#MakroMittwoch")],
     "marsh": [(IsMonth(MonthName.March), "#MarshMadness")],
     "minimalism": [(IsDay(DayName.Monday), "#MinimalismMonday")],
+    "mollusc": [(IsDay(DayName.Monday), "#MolluscMonday")],
     "moody": [(IsDay(DayName.Sunday), "#SilentSunday")],
+    "mosaic": [(IsDay(DayName.Monday), "#MosaicMonday")],
     "mountain": [(IsDay(DayName.Monday), "#MountainMonday")],
     "mountains": [(IsDay(DayName.Monday), "#MountainMonday")], 
-    "mosaic": [(IsDay(DayName.Monday), "#MosaicMonday")],
-    "mushroom": [(IsDay(DayName.Friday), "#FungiFriday")],
+    "mushroom": [(IsDay(DayName.Monday), "#MushroomMonday"), (IsDay(DayName.Friday), "#FungiFriday")],
     "nostalgic": [(IsDay(DayName.Thursday), "#ThrowbackThursday")],
     "ocean": [(IsDay(DayName.Wednesday), "#SeaWednesday #MeerMittwoch")],
     "path": [(IsDay(DayName.Friday), "#FootPathFriday")],
@@ -173,6 +178,7 @@ keyword_conditional_map = {
     "waterfall": [(IsDay(DayName.Wednesday), "#WaterfallWednesday")],
     "waves": [(IsDay(DayName.Wednesday), "#WavyWednesday")],
     "wildflower": [(IsDay(DayName.Wednesday), "#WildflowerWednesday")],
+    "wildlife": [(IsDay(DayName.Wednesday), "#WildlifeWednesday")],
     "window": [(IsDay(DayName.Friday), "#FensterFreitag #WindowFriday")]
 }
 
@@ -371,7 +377,7 @@ def main(argv):
     hash_tags = base_hash_tags
     for keyword in (keywords + [camera_make]) or [camera_make]:
         keyword_decoded = keyword.lower()
-        hash_tag = keywords_map.get(keyword_decoded)
+        hash_tag = keywords_to_hastags_map.get(keyword_decoded)
         if hash_tag:
             hash_tags += " " + hash_tag
         keyword_conditionals = keyword_conditional_map.get(keyword_decoded, [])
