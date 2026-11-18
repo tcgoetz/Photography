@@ -58,6 +58,7 @@ keywords_to_hastags_map = {
     "kayak": "#Paddling",
     "lake": "#Lake",
     "landscape": "#LandscapePhotography",
+    "lichen": "#LichenSubscribe",
     "lighthouse": "#Lighthouse",
     "macro": "#MacroPhotography",
     "mountain": "#Mountains",
@@ -436,11 +437,16 @@ def main(argv):
             long = gps_degrees_mins_secs_to_decimal(metadata.get_exif('GPSLongitude'), metadata.get_exif('GPSLongitudeRef'))
             if lat and long:
                 posting_notes += f"Location: https://www.openstreetmap.org/?mlat={lat}&mlon={long}#map={args.mapzoom}/{lat}/{long}\n"
+            altitude_meters = metadata.get_exif('GPSAltitude')
+            if altitude_meters:
+                altitude_feet = altitude_meters * 3.28084
+                posting_notes += f"Altitude: {altitude_feet} feet ({altitude_meters} meters)\n"
         posting_notes += f"Camera: {camera}\n"
         posting_notes += f"Lens: {lens}\n"
         posting_notes += f"Exposure: {shutter_speed}s @ f/{metadata.get_exif('FNumber')}\n"
         posting_notes += f"Focal length: {focal_length}\n"
-        posting_notes += f"35mm equivalent focal length: {focal_length_35mm_equiv}mm\n"
+        if focal_length_35mm_equiv:
+            posting_notes += f"35mm equivalent focal length: {focal_length_35mm_equiv}mm\n"
         posting_notes += f"ISO: {metadata.get_exif('ISO')}\n"
         posting_notes += f"Flash: {boolean_to_yes_no[flash > 0]}\n"
         posting_notes += f"Tripod: {boolean_to_yes_no[tripod]}\n\n"
